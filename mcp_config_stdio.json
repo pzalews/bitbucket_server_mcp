@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "bitbucket": {
+      "command": "python",
+      "args": ["-m", "bitbucket_mcp"],
+      "env": {
+        "BITBUCKET_URL": "https://bitbucket.yourcompany.com",
+        "BITBUCKET_TOKEN": "your-personal-access-token",
+        "BITBUCKET_DEFAULT_PROJECT": "MYPROJ"
+      }
+    }
+  }
+}

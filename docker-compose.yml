@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  bitbucket-mcp:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - BITBUCKET_URL=${BITBUCKET_URL}
+      - BITBUCKET_TOKEN=${BITBUCKET_TOKEN:-}
+      - BITBUCKET_USERNAME=${BITBUCKET_USERNAME:-}
+      - BITBUCKET_PASSWORD=${BITBUCKET_PASSWORD:-}
+      - BITBUCKET_DEFAULT_PROJECT=${BITBUCKET_DEFAULT_PROJECT:-}
+      - BITBUCKET_READ_ONLY=${BITBUCKET_READ_ONLY:-false}
+      - BITBUCKET_DIFF_MAX_LINES_PER_FILE=${BITBUCKET_DIFF_MAX_LINES_PER_FILE:-500}
+      - BITBUCKET_CUSTOM_HEADERS=${BITBUCKET_CUSTOM_HEADERS:-}
+      - BITBUCKET_LOG_PATH=/var/log/bitbucket-mcp/server.log
+      - MCP_TRANSPORT=http
+      - MCP_HTTP_HOST=0.0.0.0
+      - MCP_HTTP_PORT=8000
+    volumes:
+      - mcp_logs:/var/log/bitbucket-mcp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/mcp/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mcp_logs:
