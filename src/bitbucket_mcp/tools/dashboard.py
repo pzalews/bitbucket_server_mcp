@@ -13,7 +13,9 @@ async def get_dashboard_pull_requests(
     role: Literal["AUTHOR", "REVIEWER", "PARTICIPANT"] | None = None,
     state: Literal["OPEN", "MERGED", "DECLINED"] | None = None,
     participant_status: Literal["APPROVED", "UNAPPROVED", "NEEDS_WORK"] | None = None,
-    order: Literal["NEWEST", "OLDEST", "PARTICIPANT_STATUS", "CLOSED_DATE", "NEWEST_ACTIVITY"] | None = None,
+    order: Literal[
+        "NEWEST", "OLDEST", "PARTICIPANT_STATUS", "CLOSED_DATE", "NEWEST_ACTIVITY"
+    ] | None = None,
     closed_since: int | None = None,
 ) -> list[dict[str, Any]]:
     """Get pull requests from the authenticated user's dashboard across all projects.
