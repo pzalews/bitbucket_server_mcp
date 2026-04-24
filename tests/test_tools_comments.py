@@ -64,8 +64,3 @@ async def test_publish_review_with_comment_and_status() -> None:
     client.update_participant_status.assert_called_once_with("PROJ", "repo", 1, "jdoe", "APPROVED")
 
 
-@pytest.mark.asyncio
-async def test_publish_review_invalid_status() -> None:
-    ctx = _make_ctx(AsyncMock())
-    with pytest.raises(ValueError, match="status must be"):
-        await publish_review(ctx=ctx, repository="r", pr_id=1, status="UNKNOWN")

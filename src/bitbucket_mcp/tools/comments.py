@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from fastmcp import Context
 
@@ -43,7 +43,7 @@ async def add_comment(
     repository: str = "",
     pr_id: int = 0,
     text: str = "",
-    state: str = "OPEN",
+    state: Literal["OPEN", "PENDING"] = "OPEN",
     parent_id: int | None = None,
 ) -> dict[str, Any]:
     """Add a comment to a pull request.
@@ -133,7 +133,7 @@ async def publish_review(
     repository: str = "",
     pr_id: int = 0,
     overall_comment: str | None = None,
-    status: str = "APPROVED",
+    status: Literal["APPROVED", "UNAPPROVED", "NEEDS_WORK"] = "APPROVED",
     reviewer_slug: str | None = None,
 ) -> dict[str, Any]:
     """Publish a PR review: post an overall comment and set participant status.
@@ -143,9 +143,6 @@ async def publish_review(
     overall_comment: Optional overall review comment to post on the PR.
     """
     _require_write(ctx, "publish_review")
-    valid_statuses = {"APPROVED", "UNAPPROVED", "NEEDS_WORK"}
-    if status not in valid_statuses:
-        raise ValueError(f"status must be one of {sorted(valid_statuses)}")
     project_key = _resolve_project(ctx, project)
     async with log_tool_call("publish_review", project=project_key, repo=repository):
         client: BitbucketClient = ctx.lifespan_context["client"]
