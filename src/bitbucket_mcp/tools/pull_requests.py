@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from fastmcp import Context
 
@@ -30,13 +30,13 @@ async def list_pull_requests(
     ctx: Context,
     project: str | None = None,
     repository: str = "",
-    state: str = "OPEN",
+    state: Literal["OPEN", "MERGED", "DECLINED"] = "OPEN",
     author: str | None = None,
-    direction: str | None = None,
+    direction: Literal["INCOMING", "OUTGOING"] | None = None,
 ) -> list[dict[str, Any]]:
     """List pull requests in a repository.
 
-    state: OPEN | MERGED | DECLINED | ALL (default: OPEN)
+    state: OPEN | MERGED | DECLINED (default: OPEN)
     direction: INCOMING | OUTGOING
     author: Filter by author username.
     """

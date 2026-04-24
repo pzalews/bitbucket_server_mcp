@@ -60,3 +60,58 @@ def test_prompt_registered() -> None:
     prompts = asyncio.run(mcp.list_prompts())
     names = {p.name for p in prompts}
     assert "review_pull_request_prompt" in names
+
+
+def _enum_values(schema: dict) -> set[str]:
+    """Extract enum values from a JSON schema property (handles anyOf for optional Literals)."""
+    if "enum" in schema:
+        return set(schema["enum"])
+    for item in schema.get("anyOf", []):
+        if "enum" in item:
+            return set(item["enum"])
+    raise AssertionError(f"No enum found in schema: {schema}")
+
+
+def test_pull_request_state_enum_schema() -> None:
+    mcp = create_server()
+    tools = asyncio.run(mcp.list_tools())
+    tool = next(t for t in tools if t.name == "list_pull_requests")
+    props = tool.to_mcp_tool().inputSchema["properties"]
+    assert _enum_values(props["state"]) == {"OPEN", "MERGED", "DECLINED"}
+
+
+def test_pull_request_direction_enum_schema() -> None:
+    mcp = create_server()
+    tools = asyncio.run(mcp.list_tools())
+    tool = next(t for t in tools if t.name == "list_pull_requests")
+    props = tool.to_mcp_tool().inputSchema["properties"]
+    assert _enum_values(props["direction"]) == {"INCOMING", "OUTGOING"}
+
+
+def test_dashboard_pr_enum_schemas() -> None:
+    mcp = create_server()
+    tools = asyncio.run(mcp.list_tools())
+    tool = next(t for t in tools if t.name == "get_dashboard_pull_requests")
+    props = tool.to_mcp_tool().inputSchema["properties"]
+    assert _enum_values(props["state"]) == {"OPEN", "MERGED", "DECLINED"}
+    assert _enum_values(props["role"]) == {"AUTHOR", "REVIEWER", "PARTICIPANT"}
+    assert _enum_values(props["participant_status"]) == {"APPROVED", "UNAPPROVED", "NEEDS_WORK"}
+    assert _enum_values(props["order"]) == {
+        "NEWEST", "OLDEST", "PARTICIPANT_STATUS", "CLOSED_DATE", "NEWEST_ACTIVITY"
+    }
+
+
+def test_add_comment_state_enum_schema() -> None:
+    mcp = create_server()
+    tools = asyncio.run(mcp.list_tools())
+    tool = next(t for t in tools if t.name == "add_comment")
+    props = tool.to_mcp_tool().inputSchema["properties"]
+    assert _enum_values(props["state"]) == {"OPEN", "PENDING"}
+
+
+def test_publish_review_status_enum_schema() -> None:
+    mcp = create_server()
+    tools = asyncio.run(mcp.list_tools())
+    tool = next(t for t in tools if t.name == "publish_review")
+    props = tool.to_mcp_tool().inputSchema["properties"]
+    assert _enum_values(props["status"]) == {"APPROVED", "UNAPPROVED", "NEEDS_WORK"}
