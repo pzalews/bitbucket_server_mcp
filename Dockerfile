@@ -1,15 +1,27 @@
-FROM python:3.12-slim AS builder
+# Base image pinned by digest; Dependabot (docker ecosystem) proposes updates.
+ARG PYTHON_IMAGE=python:3.12-slim-trixie@sha256:05a994d2344eb364cc186910f4fc8786a38215f39f00d0acc25bff33a08f4177
+
+FROM ${PYTHON_IMAGE} AS builder
 
 WORKDIR /app
 
-RUN pip install uv
+# uv binary only in the builder stage (kept out of site-packages, so not shipped at runtime).
+COPY --from=ghcr.io/astral-sh/uv:0.13.9@sha256:49fe3c925d4b7a84ba2ef19883307bba2bbcf929a22040afb46f2dd092d13aeb /uv /usr/local/bin/uv
 
-COPY pyproject.toml README.md ./
+COPY pyproject.toml uv.lock README.md ./
 COPY src/ src/
 
-RUN uv pip install --system --no-cache .
+# Install exactly the versions pinned in uv.lock (fails if the lockfile is stale).
+RUN uv export --frozen --no-dev --no-emit-project -o /tmp/requirements.txt \
+    && uv pip install --system --no-cache -r /tmp/requirements.txt \
+    && uv pip install --system --no-cache --no-deps .
 
-FROM python:3.12-slim
+FROM ${PYTHON_IMAGE}
+
+# Pick up Debian security fixes released after the base image was built.
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

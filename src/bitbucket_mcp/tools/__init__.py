@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Callable
+from typing import Any
+
 from fastmcp import FastMCP
 
 from .branches import create_branch, delete_branch, list_branches
@@ -30,7 +33,7 @@ from .search import search
 
 
 def register_all_tools(mcp: FastMCP) -> None:
-    for fn in [
+    tools: list[Callable[..., Any]] = [
         list_projects,
         list_repositories,
         browse_repository,
@@ -59,5 +62,6 @@ def register_all_tools(mcp: FastMCP) -> None:
         get_activities,
         search,
         get_dashboard_pull_requests,
-    ]:
+    ]
+    for fn in tools:
         mcp.add_tool(fn)

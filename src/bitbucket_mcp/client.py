@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from typing import Any, cast
 
 import httpx
 import structlog
@@ -141,7 +141,7 @@ class BitbucketClient:
             "GET",
             f"/rest/api/1.0/projects/{project_key}/repos/{repo_slug}/branches/default",
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def browse_repository(
         self,
@@ -158,7 +158,7 @@ class BitbucketClient:
             f"/rest/api/1.0/projects/{project_key}/repos/{repo_slug}/browse/{path}",
             params=params or None,
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def get_file_content(
         self,
@@ -176,7 +176,7 @@ class BitbucketClient:
             params=params or None,
             raw=True,
         )
-        return result  # type: ignore[return-value]
+        return cast(str, result)
 
     # ── Branches ──────────────────────────────────────────────────────────────
     async def list_branches(
@@ -211,7 +211,7 @@ class BitbucketClient:
             f"/rest/branch-utils/1.0/projects/{project_key}/repos/{repo_slug}/branches",
             json={"name": branch_ref, "startPoint": start_ref},
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def delete_branch(
         self, project_key: str, repo_slug: str, name: str
@@ -278,7 +278,7 @@ class BitbucketClient:
             "GET",
             f"/rest/api/1.0/projects/{project_key}/repos/{repo_slug}/pull-requests/{pr_id}",
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def create_pull_request(
         self,
@@ -313,7 +313,7 @@ class BitbucketClient:
             f"/rest/api/1.0/projects/{project_key}/repos/{repo_slug}/pull-requests",
             json=body,
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def get_default_reviewers(
         self,
@@ -343,7 +343,7 @@ class BitbucketClient:
             f"/rest/api/1.0/projects/{project_key}/repos/{repo_slug}/pull-requests/{pr_id}",
             json=updates,
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def merge_pull_request(
         self,
@@ -364,7 +364,7 @@ class BitbucketClient:
             params={"version": version},
             json={"strategyId": strategy_map.get(strategy, "no-ff")},
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def decline_pull_request(
         self, project_key: str, repo_slug: str, pr_id: int, version: int
@@ -374,7 +374,7 @@ class BitbucketClient:
             f"/rest/api/1.0/projects/{project_key}/repos/{repo_slug}/pull-requests/{pr_id}/decline",
             params={"version": version},
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def approve_pull_request(
         self, project_key: str, repo_slug: str, pr_id: int
@@ -383,7 +383,7 @@ class BitbucketClient:
             "POST",
             f"/rest/api/1.0/projects/{project_key}/repos/{repo_slug}/pull-requests/{pr_id}/approve",
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def unapprove_pull_request(
         self, project_key: str, repo_slug: str, pr_id: int
@@ -405,7 +405,7 @@ class BitbucketClient:
             f"/rest/api/1.0/projects/{project_key}/repos/{repo_slug}/pull-requests/{pr_id}/diff",
             params={"contextLines": context_lines, "whitespace": "IGNORE_ALL"},
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def get_pull_request_activities(
         self, project_key: str, repo_slug: str, pr_id: int
@@ -431,13 +431,13 @@ class BitbucketClient:
             f"/rest/api/1.0/projects/{project_key}/repos/{repo_slug}"
             f"/pull-requests/{pr_id}/comments/{comment_id}",
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def get_pull_request_participants(
         self, project_key: str, repo_slug: str, pr_id: int
     ) -> list[dict[str, Any]]:
         pr = await self.get_pull_request(project_key, repo_slug, pr_id)
-        return pr.get("participants", [])  # type: ignore[return-value]
+        return cast(list[dict[str, Any]], pr.get("participants", []))
 
     async def add_comment(
         self,
@@ -457,7 +457,7 @@ class BitbucketClient:
             f"/pull-requests/{pr_id}/comments",
             json=body,
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def add_comment_inline(
         self,
@@ -485,7 +485,7 @@ class BitbucketClient:
             f"/pull-requests/{pr_id}/comments",
             json=body,
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def edit_comment(
         self,
@@ -502,7 +502,7 @@ class BitbucketClient:
             f"/pull-requests/{pr_id}/comments/{comment_id}",
             json={"text": text, "version": version},
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     async def delete_comment(
         self,
@@ -533,7 +533,7 @@ class BitbucketClient:
             f"/pull-requests/{pr_id}/participants/{user_slug}",
             json={"user": {"name": user_slug}, "status": status},
         )
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     # ── Search ────────────────────────────────────────────────────────────────
     async def search(
@@ -555,7 +555,7 @@ class BitbucketClient:
         if scope:
             body["scope"] = scope
         result = await self._request("POST", "/rest/search/latest/search", json=body)
-        return result  # type: ignore[return-value]
+        return cast(dict[str, Any], result)
 
     # ── Dashboard ─────────────────────────────────────────────────────────────
     async def get_dashboard_pull_requests(
